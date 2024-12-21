@@ -1,0 +1,145 @@
+spring:
+
+  application:
+    # 应用名称
+    name: xxl-job
+
+  profiles:
+    active: dev
+
+  mvc:
+    converters:
+      # spring mvc使用的json转换器，使用规约指定的gson
+      preferred-json-mapper: jackson
+    servlet:
+      load-on-startup: 0
+    static-path-pattern: '/static/**'
+
+  resources:
+    static-locations: 'classpath:/static/'
+
+  freemarker:
+    enabled: true
+    templateLoaderPath: 'classpath:/templates/'
+    suffix: '.ftl'
+    charset: UTF-8
+    request-context-attribute: request
+    settings:
+      number_format: '0.##########'
+      new_builtin_class_resolver: safer
+
+  # mysql连接配置
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://${VPS_MYSQL_HOST}:${VPS_MYSQL_PORT}/xxl_job?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&connectTimeout=3000&socketTimeout=3000&useSSL=false
+    username: ${VPS_MYSQL_USERNAME}
+    password: ${VPS_MYSQL_PASSWORD}
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 30
+      idleTimeout: 600000
+      connectionTimeout: 30000
+      leakDetectionThreshold: 300000
+
+  config:
+    # NacosConfigDataMissingEnvironmentPostProcessor
+    # 指定nacos使用配置文件的dataId
+    import: 'nacos:${spring.application.name}.yml'
+
+  cloud:
+    discovery:
+      # 当这个选项被启用后nacos的loadbalancer将会被激活
+      # @ConditionalOnDiscoveryEnabled
+      enabled: true
+      # 指定tailscale网卡进行注册，这可以避免在网络异常的情况下注册容器网卡，再次异常后下线容器网卡失败
+      network-interface: tailscale0
+    # nacos配置，注意另外需配置spring.cloud.config.import
+    nacos:
+      # NacosConfigProperties
+      config:
+#        server-addr: vps-nacos1:8848,vps-nacos2:8848,vps-nacos3:8848
+        server-addr: vps-nacos:8848
+        namespace: ${spring.profiles.active}
+      # NacosDiscoveryProperties
+      discovery:
+        server-addr: ${spring.cloud.nacos.config.server-addr}
+        namespace: ${spring.cloud.nacos.config.namespace}
+        # 指定当前应用所在集群的名称，Nacos负载均衡将优先调度同集群，跨集群调用将打印warn日志
+        cluster-name: vps
+
+    loadbalancer:
+      nacos:
+        # 启用nacos的loadbalancer
+        # @ConditionalOnLoadBalancerNacos
+        enabled: true
+
+    # openfeign配置
+    openfeign:
+      okhttp:
+        # OkHttpFeignConfiguration
+        enabled: true
+      # FeignHttpClientProperties
+      httpclient:
+        # 关闭ssl验证
+        disable-ssl-validation: true
+      # FeignClientProperties
+      client:
+        # FeignClientConfiguration
+        config:
+          # default表示默认，或者具体的 服务名表示指定服务
+          default:
+            loggerLevel: NONE
+            connect-timeout: 5000
+            read-timeout: 5000
+            follow-redirects: true
+
+  mail:
+    host: smtp.qq.com
+    port: 25
+    username: 759543714@qq.com
+    from: 759543714@qq.com
+    password: iufiqsqsrlukbfeg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+
+mybatis:
+  mapper-locations: 'classpath:/mybatis-mapper/*Mapper.xml'
+
+server:
+  port: 8083
+#  servlet:
+#    context-path: '/xxl-job-admin'
+  # Compression
+  compression:
+    # 启用gzip压缩
+    enabled: true
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus,offline,online"
+
+# 日志配置
+logging:
+  level:
+    root: info
+
+xxl:
+  job:
+    accessToken: ''
+    i18n: zh_CN
+    triggerpool:
+      fast:
+        max: 200
+      slow:
+        max: 100
+    logretentiondays: 30
