@@ -137,7 +137,7 @@ public class JobUserController {
     @RequestMapping("/remove")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public ReturnT<String> remove(HttpServletRequest request, int id) {
+    public ReturnT<String> remove(HttpServletRequest request, long id) {
 
         // avoid opt login seft
         XxlJobUser loginUser = PermissionInterceptor.getLoginUser(request);

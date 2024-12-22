@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +61,15 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
 		return true;	// proceed with the next interceptor
 	}
 
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+		// 修复Spring6不支持Freemarker的问题
+		// https://blog.csdn.net/qq_33969539/article/details/132985043
+		Object loginIdentityKey = request.getAttribute(LoginService.LOGIN_IDENTITY_KEY);
+		if (null != modelAndView && null != loginIdentityKey) {
+			modelAndView.addObject(LoginService.LOGIN_IDENTITY_KEY, loginIdentityKey);
+		}
+	}
 
 	// -------------------- permission tool --------------------
 

@@ -5,11 +5,14 @@ spring:
     name: xxl-job
 
   profiles:
-    active: dev
+    active: pre
+
+  main:
+    allow-circular-references: true
 
   mvc:
     converters:
-      # spring mvc使用的json转换器，使用规约指定的gson
+      # spring mvc使用的json转换器
       preferred-json-mapper: jackson
     servlet:
       load-on-startup: 0

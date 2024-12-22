@@ -59,6 +59,14 @@
             <version>${project.parent.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>fun.fengwk.upms</groupId>
+			<artifactId>upms-share</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>fun.fengwk.gateway</groupId>
+			<artifactId>gateway-share</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -6,17 +6,26 @@ import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.core.util.JacksonUtil;
 import com.xxl.job.admin.dao.XxlJobUserDao;
 import com.xxl.job.core.biz.model.ReturnT;
+import fun.fengwk.convention4j.api.result.Result;
+import fun.fengwk.gateway.share.context.GatewayContext;
+import fun.fengwk.upms.share.permission.client.UserPermissionFeignClient;
+import fun.fengwk.upms.share.user.client.UserFeignClient;
+import fun.fengwk.upms.share.user.model.UserDTO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigInteger;
 
 /**
  * @author xuxueli 2019-05-04 22:13:264
  */
+@Slf4j
 @Service
 public class LoginService {
 
@@ -24,6 +33,17 @@ public class LoginService {
 
     @Resource
     private XxlJobUserDao xxlJobUserDao;
+    @Resource
+    private UserFeignClient userFeignClient;
+    @Resource
+    private UserPermissionFeignClient userPermissionFeignClient;
+    @Resource
+    private GatewayContext gatewayContext;
+
+    @Value("${xxl.job.upms-permission-admin:xxl_job_admin}")
+    private String upmsPermissionAdmin;
+    @Value("${xxl.job.upms-permission-user:xxl_job_user}")
+    private String upmsPermissionUser;
 
 
     // ---------------------- token tool ----------------------
@@ -87,25 +107,54 @@ public class LoginService {
      * @return
      */
     public XxlJobUser ifLogin(HttpServletRequest request, HttpServletResponse response){
-        String cookieToken = CookieUtil.getValue(request, LOGIN_IDENTITY_KEY);
-        if (cookieToken != null) {
-            XxlJobUser cookieUser = null;
-            try {
-                cookieUser = parseToken(cookieToken);
-            } catch (Exception e) {
-                logout(request, response);
-            }
-            if (cookieUser != null) {
-                XxlJobUser dbUser = xxlJobUserDao.loadByUserName(cookieUser.getUsername());
-                if (dbUser != null) {
-                    if (cookieUser.getPassword().equals(dbUser.getPassword())) {
-                        return dbUser;
-                    }
-                }
-            }
+        String namespace = gatewayContext.getAccessUserNamespace();
+        Long userId = gatewayContext.getAccessUserId();
+        if (!StringUtils.hasText(namespace) || userId == null) {
+            return null;
         }
-        return null;
+
+        Integer userRole = getUserRole(namespace, userId);
+        if (userRole == null) {
+            return null;
+        }
+
+        Result<UserDTO> userResult = userFeignClient.getUser(namespace, userId);
+        if (!userResult.isSuccess()) {
+            log.error("get login user failed, namespace: {}, userId: {}, userResult: {}",
+                namespace, userId, userResult);
+            return null;
+        }
+
+        UserDTO userDTO = userResult.getData();
+
+        XxlJobUser xxlJobUser = new XxlJobUser();
+        xxlJobUser.setId(userDTO.getUserId());
+        xxlJobUser.setUsername(userDTO.getUsername());
+        xxlJobUser.setRole(userRole);
+        xxlJobUser.setPermission("");
+        return xxlJobUser;
     }
 
+    private Integer getUserRole(String namespace, Long userId) {
+        Result<Boolean> userPermissionResult = userPermissionFeignClient.validatePermission(namespace, userId, upmsPermissionUser);
+        if (userPermissionResult.isSuccess()) {
+            if (userPermissionResult.getData()) {
+                return 0;
+            }
+        } else {
+            log.error("query user role failed, namespace: {}, userId: {}", namespace, userId);
+        }
+
+        Result<Boolean> adminPermissionResult = userPermissionFeignClient.validatePermission(namespace, userId, upmsPermissionAdmin);
+        if (adminPermissionResult.isSuccess()) {
+            if (adminPermissionResult.getData()) {
+                return 1;
+            }
+        } else {
+            log.error("query admin role failed, namespace: {}, userId: {}", namespace, userId);
+        }
+
+        return null;
+    }
 
 }
