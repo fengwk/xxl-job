@@ -5,7 +5,7 @@
     <parent>
         <groupId>fun.fengwk.convention4j</groupId>
         <artifactId>convention4j-parent</artifactId>
-        <version>1.1.14</version>
+        <version>1.1.15</version>
     </parent>
 
 	<groupId>com.xuxueli</groupId>
@@ -33,8 +33,8 @@
 		<maven-source-plugin.version>3.3.1</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>3.11.1</maven-javadoc-plugin.version>
 		<maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
-		<upms-share.version>1.0.6</upms-share.version>
-		<gateway-share.version>1.0.5</gateway-share.version>
+		<upms-share.version>1.0.7</upms-share.version>
+		<gateway-share.version>1.0.7</gateway-share.version>
 	</properties>
 
 	<licenses>
@@ -57,7 +57,7 @@
 			<email>931591021@qq.com</email>
 			<url>https://github.com/xuxueli</url>
 		</developer>
-	</developers>]
+	</developers>
 
 	<dependencyManagement>
 		<dependencies>
@@ -118,22 +118,22 @@
 						</executions>
 					</plugin>
 					<!-- GPG -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${maven-gpg-plugin.version}</version>
-						<configuration>
-							<useAgent>false</useAgent>
-						</configuration>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-gpg-plugin</artifactId>-->
+<!--                        <version>${maven-gpg-plugin.version}</version>-->
+<!--						<configuration>-->
+<!--							<useAgent>false</useAgent>-->
+<!--						</configuration>-->
+<!--                        <executions>-->
+<!--                            <execution>-->
+<!--                                <phase>verify</phase>-->
+<!--                                <goals>-->
+<!--                                    <goal>sign</goal>-->
+<!--                                </goals>-->
+<!--                            </execution>-->
+<!--                        </executions>-->
+<!--                    </plugin>-->
 				</plugins>
 			</build>
 			<distributionManagement>
