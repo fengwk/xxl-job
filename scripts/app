@@ -73,10 +73,10 @@ start() {
   fi
   JAVA_OPTS="-server -Xms1G -Xmx1G$JAVA_OPTS"
   JAVA_OPTS="$JAVA_OPTS -Dsun.net.inetaddr.ttl=30 -Dsun.net.inetaddr.negative.ttl=5"
-  JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:10000 $JAVA_OPTS"
-#  if [ "$DEBUG" == "true" ]; then
-#    JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:10000"
-#  fi
+  # JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:10000 $JAVA_OPTS"
+  if [ "$DEBUG" == "true" ]; then
+    JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:10000"
+  fi
   if [ -n "$agent_jar" ]; then
     JAVA_OPTS="$JAVA_OPTS -javaagent:$agent_jar"
   fi
