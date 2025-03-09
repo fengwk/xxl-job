@@ -44,28 +44,18 @@ spring:
       connectionTimeout: 30000
       leakDetectionThreshold: 300000
 
-  config:
-    # NacosConfigDataMissingEnvironmentPostProcessor
-    # 指定nacos使用配置文件的dataId
-    import: 'nacos:${spring.application.name}.yml'
-
   cloud:
     discovery:
       # 当这个选项被启用后nacos的loadbalancer将会被激活
       # @ConditionalOnDiscoveryEnabled
       enabled: true
-      # 指定tailscale网卡进行注册，这可以避免在网络异常的情况下注册容器网卡，再次异常后下线容器网卡失败
-      network-interface: tailscale0
     # nacos配置，注意另外需配置spring.cloud.config.import
     nacos:
       # NacosConfigProperties
       config:
-#        server-addr: vps-nacos1:8848,vps-nacos2:8848,vps-nacos3:8848
-        server-addr: vps-nacos:8848
         namespace: ${spring.profiles.active}
       # NacosDiscoveryProperties
       discovery:
-        server-addr: ${spring.cloud.nacos.config.server-addr}
         namespace: ${spring.cloud.nacos.config.namespace}
         # 指定当前应用所在集群的名称，Nacos负载均衡将优先调度同集群，跨集群调用将打印warn日志
         cluster-name: vps
@@ -117,6 +107,8 @@ mybatis:
 
 server:
   port: 8083
+  # 优雅停机：先停止接收请求后再停机
+  shutdown: graceful
 #  servlet:
 #    context-path: '/xxl-job-admin'
   # Compression

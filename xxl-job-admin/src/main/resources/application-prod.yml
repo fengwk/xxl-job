@@ -1,0 +1,13 @@
+spring:
+  # 配置nacos文件导入，必须定义在profile文件中，这样才能确保该文件导入晚于profile文件加载以便读取到正确的server-addr
+  config:
+    # NacosConfigDataMissingEnvironmentPostProcessor
+    # 指定nacos使用配置文件的dataId
+    import: 'nacos:${spring.application.name}.yml'
+  cloud:
+    nacos:
+      config:
+        # server-addr: vps-nacos1:8848,vps-nacos2:8848,vps-nacos3:8848
+        server-addr: vps-nacos:8848
+      discovery:
+        server-addr: ${spring.cloud.nacos.config.server-addr}
