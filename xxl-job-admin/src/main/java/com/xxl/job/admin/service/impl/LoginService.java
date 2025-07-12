@@ -108,7 +108,7 @@ public class LoginService {
      */
     public XxlJobUser ifLogin(HttpServletRequest request, HttpServletResponse response){
         String namespace = gatewayContext.getAccessUserNamespace();
-        Long userId = gatewayContext.getAccessUserId();
+        String userId = gatewayContext.getAccessUserId();
         if (!StringUtils.hasText(namespace) || userId == null) {
             return null;
         }
@@ -128,14 +128,14 @@ public class LoginService {
         UserDTO userDTO = userResult.getData();
 
         XxlJobUser xxlJobUser = new XxlJobUser();
-        xxlJobUser.setId(userDTO.getUserId());
+        xxlJobUser.setId(0L); // 使用同一用户占位
         xxlJobUser.setUsername(userDTO.getUsername());
         xxlJobUser.setRole(userRole);
         xxlJobUser.setPermission("");
         return xxlJobUser;
     }
 
-    private Integer getUserRole(String namespace, Long userId) {
+    private Integer getUserRole(String namespace, String userId) {
         Result<Boolean> userPermissionResult = userPermissionFeignClient.validatePermission(namespace, userId, upmsPermissionUser);
         if (userPermissionResult.isSuccess()) {
             if (userPermissionResult.getData()) {
